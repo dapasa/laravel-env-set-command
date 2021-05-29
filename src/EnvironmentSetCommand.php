@@ -54,7 +54,10 @@ class EnvironmentSetCommand extends Command
         }
 
         $content = file_get_contents($envFilePath);
+
         [$newEnvFileContent, $isNewVariableSet] = $this->setEnvVariable($content, $key, $value);
+
+        //$this->info($newEnvFileContent);
 
         if ($isNewVariableSet) {
             $this->info("A new environment variable with key '{$key}' has been set to '{$value}'");
@@ -84,11 +87,11 @@ class EnvironmentSetCommand extends Command
             $value = '"' . $value . '"';
         }
 
-        $newPair = $key . '=' . $value;
+        $newPair = $key . '=' . $value . "\n";
 
         // For existed key.
         if ($oldPair !== null) {
-            $replaced = preg_replace('/^' . preg_quote($oldPair, '/') . '$/uimU', $newPair, $envFileContent);
+            $replaced = preg_replace('/' . preg_quote($oldPair, '/') . '/uimU', $newPair, $envFileContent);
             return [$replaced, false];
         }
 
@@ -108,7 +111,8 @@ class EnvironmentSetCommand extends Command
     public function readKeyValuePair(string $envFileContent, string $key): ?string
     {
         // Match the given key at the beginning of a line
-        if (preg_match("#^ *{$key} *= *[^\r\n]*$#uimU", $envFileContent, $matches)) {
+        if (preg_match("#${key}=.+\n#uimU", $envFileContent, $matches)) {
+
             return $matches[0];
         }
 
